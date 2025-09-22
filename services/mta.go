@@ -21,6 +21,7 @@ func buildFeedURL(route string) (string, error) {
 }
 
 func FetchFeed(route string) (*gtfs.FeedMessage, error) {
+	key := strings.ToUpper(route)
 	_, ok := config.RouteFeeds[route]
 	if !ok {
 		return nil, fmt.Errorf("unknown route: %s", route)
@@ -47,6 +48,17 @@ func FetchFeed(route string) (*gtfs.FeedMessage, error) {
 	feed := &gtfs.FeedMessage{}
 	if err := proto.Unmarshal(body, feed); err != nil {
 		return nil, err
+	}
+
+	filtered := gtfs.FeedMessage{
+		Header: feed.Header,
+	}
+	for _, entity := range feed.Entity {
+		if entity.TripUpdate != nil && entity.TripUpdate.Trip != nil {
+			if entity.TripUpdate.Trip.RouteId != nil && *entity.TripUpdate.Trip.RouteId == key {
+				filtered.Entity = append(filtered.Entity, entity)
+			}
+		}
 	}
 
 	return feed, nil
