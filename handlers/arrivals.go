@@ -14,12 +14,25 @@ import (
 
 func ArrivalsHandler(w http.ResponseWriter, r *http.Request) {
 	route := strings.ToUpper(r.URL.Query().Get("route"))
+	station := r.URL.Query().Get("station")
 	if route == "" {
 		http.Error(w, "missing route parameter", http.StatusBadRequest)
 		return
 	}
 
-	station := r.URL.Query().Get("station")
+	if route == "ALL" && station != "" {
+		stopIDs, ok := config.StationStops[station]
+		if !ok {
+			http.Error(w, "unknown station: "+station, http.StatusBadRequest)
+			return
+		}
+
+		arrivals := services.FetchArrivalsForStation(services.AllRoutes, stopIDs)
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(arrivals)
+		return
+	}
 
 	feed, err := services.FetchFeed(route)
 	if err != nil {
