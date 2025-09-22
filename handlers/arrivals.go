@@ -15,9 +15,32 @@ import (
 func ArrivalsHandler(w http.ResponseWriter, r *http.Request) {
 	route := strings.ToUpper(r.URL.Query().Get("route"))
 	station := r.URL.Query().Get("station")
+	direction := strings.ToUpper(r.URL.Query().Get("direction"))
+
 	if route == "" {
 		http.Error(w, "missing route parameter", http.StatusBadRequest)
 		return
+	}
+
+	var stationStopIDs []string
+	if station != "" {
+		stopIDs, ok := config.StationStops[station]
+		if !ok {
+			http.Error(w, "unknown station: "+station, http.StatusBadRequest)
+			return
+		}
+
+		if direction == "N" || direction == "S" {
+			filtered := []string{}
+			for _, id := range stopIDs {
+				if strings.HasSuffix(id, direction) {
+					filtered = append(filtered, id)
+				}
+			}
+			stationStopIDs = filtered
+		} else {
+			stationStopIDs = stopIDs
+		}
 	}
 
 	if route == "ALL" && station != "" {
@@ -43,16 +66,6 @@ func ArrivalsHandler(w http.ResponseWriter, r *http.Request) {
 	arrivals := []models.Arrival{}
 	now := time.Now().Unix()
 	cutoff := time.Now().Add(config.ArrivalWindowMinutes * time.Minute).Unix()
-
-	var stationStopIDs []string
-	if station != "" {
-		stopIDs, ok := config.StationStops[station]
-		if !ok {
-			http.Error(w, "unknown station: "+station, http.StatusBadRequest)
-			return
-		}
-		stationStopIDs = stopIDs
-	}
 
 	for _, entity := range feed.Entity {
 		if entity.TripUpdate != nil {

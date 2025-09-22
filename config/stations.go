@@ -1,6 +1,5 @@
 package config
 
-// StationStops maps slugified station name -> stop IDs (N/S directions etc)
 var StationStops = map[string][]string{
 	"1-av":                               {"L06", "L06N", "L06S"},
 	"103-st":                             {"119", "119N", "119S", "624", "624N", "624S", "A18", "A18N", "A18S"},

@@ -5,50 +5,7 @@ The MTA API returns all of their data in GTFS format, making it annoyingly diffi
 This API has several endpoints that you can hit:
 **/feed?route={some subway line}**
 This will pull up the entire data from each of the 7 endpoints in a json format. Example use case below:
-/feed?route=B returns the following output:
-
-````
-
-returns JSON like:
-
-```json
-{
-  "header": {
-    "gtfs_realtime_version": "1.0",
-    "timestamp": 1758503002
-  },
-  "entity": [
-    {
-      "id": "000001D",
-      "trip_update": {
-        "trip": {
-          "trip_id": "121250_D..N07X002",
-          "route_id": "D",
-          "start_time": "20:12:28",
-          "start_date": "20250921"
-        }
-      }
-    },
-    {
-      "id": "000002D",
-      "vehicle": {
-        "trip": {
-          "trip_id": "121250_D..N07X002",
-          "route_id": "D",
-          "start_time": "20:12:28",
-          "start_date": "20250921"
-        },
-        "current_stop_sequence": 14,
-        "stop_id": "R31N",
-        "current_status": 1,
-        "timestamp": 1758501774
-      }
-    },
-    ...
-  ]
-}
-
-````
+/feed?route=B returns all of the feed data associated with route B.
 
 ### /arrivals?route={some_subway_line}
 
@@ -66,6 +23,14 @@ This will give you all arrivals for the L train for the station Bedford Avenue
 This will return all of the trains in the 20 minute window we specified in the configuration file. This will return all of the trains that stop in both directions for a station.
 Examples:
 /arrivals?route=ALL&station=times-sq-42-st
+
+### /arrivals?route={a_route_or_ALL}&station={some_subway_station}&direction={N_or_S}
+
+This will return all of the trains in the 20 minute window that we specified in the configuration file going either North or South. If you do route=ALL, it will return all N or S bound trains for a particular station.
+
+### /arrivals?route={a_route_or_ALL}&direction={N_or_S}
+
+This will return for any route you choose all northbound or southbound trains.
 
 ## How to run the API
 
