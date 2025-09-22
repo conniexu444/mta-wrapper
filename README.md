@@ -50,6 +50,10 @@ returns JSON like:
 
 ````
 
+### /arrivals?route={some_subway_line}
+
+This will return all trains in all directions for a particular subway line for a given time period. The time period is defined in the config/constants.go file. It is the **ArrivalWindowMinutes** constant. Right now this is set to 20 minutes, but you can change it if you desire.
+
 ## How to run the API
 
 ### Prerequisites

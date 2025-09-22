@@ -10,6 +10,7 @@ import (
 func main() {
 	// Register endpoints
 	http.HandleFunc("/feed", handlers.FeedHandler)
+	http.HandleFunc("/arrivals", handlers.ArrivalsHandler)
 
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
