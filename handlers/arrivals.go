@@ -29,29 +29,19 @@ func ArrivalsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "unknown station: "+station, http.StatusBadRequest)
 			return
 		}
-
 		if direction == "N" || direction == "S" {
-			filtered := []string{}
 			for _, id := range stopIDs {
 				if strings.HasSuffix(id, direction) {
-					filtered = append(filtered, id)
+					stationStopIDs = append(stationStopIDs, id)
 				}
 			}
-			stationStopIDs = filtered
 		} else {
 			stationStopIDs = stopIDs
 		}
 	}
 
 	if route == "ALL" && station != "" {
-		stopIDs, ok := config.StationStops[station]
-		if !ok {
-			http.Error(w, "unknown station: "+station, http.StatusBadRequest)
-			return
-		}
-
-		arrivals := services.FetchArrivalsForStation(services.AllRoutes, stopIDs)
-
+		arrivals := services.FetchArrivalsForStation(services.AllRoutes, stationStopIDs, direction)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(arrivals)
 		return
@@ -72,14 +62,19 @@ func ArrivalsHandler(w http.ResponseWriter, r *http.Request) {
 			for _, stu := range entity.TripUpdate.StopTimeUpdate {
 				arrTime := stu.Arrival.GetTime()
 				if arrTime > now && arrTime <= cutoff {
+					stopID := stu.GetStopId()
 
-					if station != "" && !contains(stationStopIDs, stu.GetStopId()) {
+					if station != "" && !contains(stationStopIDs, stopID) {
+						continue
+					}
+
+					if (direction == "N" || direction == "S") && !strings.HasSuffix(stopID, direction) {
 						continue
 					}
 
 					arrivals = append(arrivals, models.Arrival{
 						Route:  route,
-						StopID: stu.GetStopId(),
+						StopID: stopID,
 						TripID: entity.TripUpdate.Trip.GetTripId(),
 						Time:   time.Unix(arrTime, 0),
 					})

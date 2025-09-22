@@ -1,6 +1,7 @@
 package services
 
 import (
+	"strings"
 	"sync"
 	"time"
 
@@ -17,7 +18,7 @@ var AllRoutes = []string{
 	"J", "Z",
 }
 
-func FetchArrivalsForStation(routes []string, stopIDs []string) []models.Arrival {
+func FetchArrivalsForStation(routes []string, stopIDs []string, direction string) []models.Arrival {
 	now := time.Now().Unix()
 	cutoff := time.Now().Add(config.ArrivalWindowMinutes * time.Minute).Unix()
 
@@ -38,7 +39,18 @@ func FetchArrivalsForStation(routes []string, stopIDs []string) []models.Arrival
 				if entity.TripUpdate != nil {
 					for _, stu := range entity.TripUpdate.StopTimeUpdate {
 						arrTime := stu.Arrival.GetTime()
-						if arrTime > now && arrTime <= cutoff && contains(stopIDs, stu.GetStopId()) {
+						if arrTime > now && arrTime <= cutoff {
+							stopID := stu.GetStopId()
+
+							if len(stopIDs) > 0 && !contains(stopIDs, stopID) {
+								continue
+							}
+							if direction == "N" || direction == "S" {
+								if !strings.HasSuffix(stopID, direction) {
+									continue
+								}
+							}
+
 							localArrivals = append(localArrivals, models.Arrival{
 								Route:  rt,
 								StopID: stu.GetStopId(),
