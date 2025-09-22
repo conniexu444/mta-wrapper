@@ -61,6 +61,12 @@ Examples:
 /arrivals?route=L&station=bedford-av
 This will give you all arrivals for the L train for the station Bedford Avenue
 
+### /arrivals?route=ALL&station={some_subway_station}
+
+This will return all of the trains in the 20 minute window we specified in the configuration file. This will return all of the trains that stop in both directions for a station.
+Examples:
+/arrivals?route=ALL&station=times-sq-42-st
+
 ## How to run the API
 
 ### Prerequisites
