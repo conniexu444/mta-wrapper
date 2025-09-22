@@ -19,6 +19,8 @@ func ArrivalsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	station := r.URL.Query().Get("station")
+
 	feed, err := services.FetchFeed(route)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -29,11 +31,26 @@ func ArrivalsHandler(w http.ResponseWriter, r *http.Request) {
 	now := time.Now().Unix()
 	cutoff := time.Now().Add(config.ArrivalWindowMinutes * time.Minute).Unix()
 
+	var stationStopIDs []string
+	if station != "" {
+		stopIDs, ok := config.StationStops[station]
+		if !ok {
+			http.Error(w, "unknown station: "+station, http.StatusBadRequest)
+			return
+		}
+		stationStopIDs = stopIDs
+	}
+
 	for _, entity := range feed.Entity {
 		if entity.TripUpdate != nil {
 			for _, stu := range entity.TripUpdate.StopTimeUpdate {
 				arrTime := stu.Arrival.GetTime()
 				if arrTime > now && arrTime <= cutoff {
+
+					if station != "" && !contains(stationStopIDs, stu.GetStopId()) {
+						continue
+					}
+
 					arrivals = append(arrivals, models.Arrival{
 						Route:  route,
 						StopID: stu.GetStopId(),
@@ -51,4 +68,13 @@ func ArrivalsHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(arrivals)
+}
+
+func contains(list []string, s string) bool {
+	for _, v := range list {
+		if v == s {
+			return true
+		}
+	}
+	return false
 }
