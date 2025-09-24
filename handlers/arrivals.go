@@ -10,6 +10,7 @@ import (
 	"github.com/conniexu444/mta-wrapper/config"
 	"github.com/conniexu444/mta-wrapper/models"
 	"github.com/conniexu444/mta-wrapper/services"
+	"github.com/conniexu444/mta-wrapper/utils"
 )
 
 func ArrivalsHandler(w http.ResponseWriter, r *http.Request) {
@@ -26,7 +27,14 @@ func ArrivalsHandler(w http.ResponseWriter, r *http.Request) {
 	if station != "" {
 		stopIDs, ok := config.StationStops[station]
 		if !ok {
-			http.Error(w, "unknown station: "+station, http.StatusBadRequest)
+			suggestions := utils.SuggestStations(station, config.StationStops, 3)
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"error":        "unknown station: " + station,
+				"did_you_mean": suggestions,
+			})
 			return
 		}
 		if direction == "N" || direction == "S" {
