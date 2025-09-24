@@ -11,6 +11,14 @@ This will pull up the entire data from each of the 7 endpoints in a json format.
 
 This will return all trains in all directions for a particular subway line for a given time period. The time period is defined in the config/constants.go file. It is the **ArrivalWindowMinutes** constant. Right now this is set to 20 minutes, but you can change it if you desire.
 
+#### /arrivals?route={some_subway_line}&station={some_misspelled_subway_station}
+
+Using github.com/agnivade/levenshtein go library, now when you misspell your subway station, it will give you a "Did you mean" suggestion.
+
+```
+{"did_you_mean":["times-sq-42-st"],"error":"unknown station: times-sq-42"}
+```
+
 ### /arrivals?route={some_subway_line}&station={some_subway_station}
 
 This will return all trains in all directions for a particular subway station for a given time period. The given time period is 20 minutes in the config/constants.go file.
