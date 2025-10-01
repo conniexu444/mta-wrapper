@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTA GTFS Wrapper API Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 20px;
+            margin-bottom: 40px;
+            border-radius: 8px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        nav {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        nav a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #764ba2;
+        }
+
+        section {
+            background: white;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #764ba2;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #e83e8c;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        .endpoint {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .endpoint h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .method {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .param-table th,
+        .param-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .param-table th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        .param-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .example {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>MTA GTFS Wrapper API</h1>
+            <p>A developer-friendly Go API for NYC MTA subway real-time data</p>
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="#about">About</a></li>
+                <li><a href="#getting-started">Getting Started</a></li>
+                <li><a href="#endpoints">API Endpoints</a></li>
+                <li><a href="#examples">Examples</a></li>
+            </ul>
+        </nav>
+
+        <section id="about">
+            <h2>About</h2>
+            <p>The MTA API returns all of their data in GTFS format, making it difficult to work with as a developer. This wrapper API simplifies the MTA real-time data by providing clean, developer-friendly endpoints that separate the 36 subway lines and present data in an easy-to-consume JSON format.</p>
+
+            <div class="note">
+                <strong>Note:</strong> The arrival time window is configurable in <code>config/constants.go</code> and is currently set to 20 minutes.
+            </div>
+        </section>
+
+        <section id="getting-started">
+            <h2>Getting Started</h2>
+
+            <h3>Prerequisites</h3>
+            <ul style="margin-left: 20px;">
+                <li>Go 1.16 or higher (<a href="https://go.dev/dl/" target="_blank">Download Go</a>)</li>
+                <li>Git</li>
+            </ul>
+
+            <h3>Installation</h3>
+            <pre><code># Clone the repository
+git clone https://github.com/conniexu444/mta-wrapper.git
+cd mta-wrapper
+
+# Download dependencies
+go mod tidy
+
+# Run the server
+go run main.go</code></pre>
+
+            <p>The server will start on <code>http://localhost:8080</code></p>
+
+            <h3>Configuration</h3>
+            <p>You can modify the arrival time window by editing <code>config/constants.go</code>:</p>
+            <pre><code>const ArrivalWindowMinutes = 20  // Change this value as needed</code></pre>
+        </section>
+
+        <section id="endpoints">
+            <h2>API Endpoints</h2>
+
+            <div class="endpoint">
+                <h4><span class="method">GET</span>/feed</h4>
+                <p>Returns the entire GTFS feed data in JSON format for a specific subway line.</p>
+
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>route</code></td>
+                            <td>string</td>
+                            <td>Yes</td>
+                            <td>Subway line identifier (e.g., A, B, C, 1, 2, 3, L, etc.)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="example">
+                    <strong>Example:</strong><br>
+                    <code>GET /feed?route=B</code><br>
+                    Returns all feed data for the B train.
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <h4><span class="method">GET</span>/arrivals</h4>
+                <p>Returns upcoming train arrivals with various filtering options.</p>
+
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>route</code></td>
+                            <td>string</td>
+                            <td>Yes</td>
+                            <td>Subway line (e.g., L, A, 1) or "ALL" for all lines</td>
+                        </tr>
+                        <tr>
+                            <td><code>station</code></td>
+                            <td>string</td>
+                            <td>No</td>
+                            <td>Station name (kebab-case, e.g., bedford-av, times-sq-42-st)</td>
+                        </tr>
+                        <tr>
+                            <td><code>direction</code></td>
+                            <td>string</td>
+                            <td>No</td>
+                            <td>Travel direction: "N" (Northbound) or "S" (Southbound)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Use Cases</h3>
+
+                <h4>1. All arrivals for a route</h4>
+                <div class="example">
+                    <code>GET /arrivals?route=L</code><br>
+                    Returns all L train arrivals in both directions within the next 20 minutes.
+                </div>
+
+                <h4>2. Arrivals at a specific station</h4>
+                <div class="example">
+                    <code>GET /arrivals?route=L&station=bedford-av</code><br>
+                    Returns all L train arrivals at Bedford Avenue station.
+                </div>
+
+                <h4>3. All trains at a station (any line)</h4>
+                <div class="example">
+                    <code>GET /arrivals?route=ALL&station=times-sq-42-st</code><br>
+                    Returns all trains stopping at Times Square-42nd Street within the next 20 minutes.
+                </div>
+
+                <h4>4. Directional filtering</h4>
+                <div class="example">
+                    <code>GET /arrivals?route=L&station=bedford-av&direction=N</code><br>
+                    Returns only northbound L trains at Bedford Avenue.
+                </div>
+
+                <div class="example">
+                    <code>GET /arrivals?route=ALL&direction=S</code><br>
+                    Returns all southbound trains across all lines.
+                </div>
+
+                <div class="example">
+                    <code>GET /arrivals?route=A&direction=N</code><br>
+                    Returns all northbound A trains.
+                </div>
+
+                <div class="note">
+                    <strong>Fuzzy Station Matching:</strong> If you misspell a station name, the API will suggest corrections using Levenshtein distance matching.
+                    <pre><code># Request with typo:
+GET /arrivals?route=L&station=times-sq-42
+
+# Response:
+{
+  "error": "unknown station: times-sq-42",
+  "did_you_mean": ["times-sq-42-st"]
+}</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <section id="examples">
+            <h2>Example Responses</h2>
+
+            <h3>Arrivals Response</h3>
+            <pre><code>[
+  {
+    "Route": "L",
+    "StopID": "L06N",
+    "TripID": "123456",
+    "Time": "2025-10-01T14:32:00Z"
+  },
+  {
+    "Route": "L",
+    "StopID": "L06N",
+    "TripID": "123457",
+    "Time": "2025-10-01T14:45:00Z"
+  }
+]</code></pre>
+
+            <h3>Error Response with Suggestions</h3>
+            <pre><code>{
+  "error": "unknown station: bedfor",
+  "did_you_mean": [
+    "bedford-av",
+    "bedford-park-blvd",
+    "bedford-park-blvd-lehman-coll"
+  ]
+}</code></pre>
+        </section>
+
+        <footer>
+            <p>&copy; 2025 MTA GTFS Wrapper | Built with Go</p>
+        </footer>
+    </div>
+</body>
+</html>
